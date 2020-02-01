@@ -1,13 +1,7 @@
-// Generate random room name if needed
-if (!location.hash) {
-  location.hash = Math.floor(Math.random() * 0xFFFFFF).toString(16);
-}
-const roomHash = location.hash.substring(1);
-
 // TODO: Replace with your own channel ID
-const drone = new ScaleDrone('yiS12Ts5RdNhebyM');
+const drone = new ScaleDrone('u7oAvsl3CaxdZdVR');
 // Room name needs to be prefixed with 'observable-'
-const roomName = 'observable-' + roomHash;
+const roomName = 'observable-' + 'babakVideo';
 const configuration = {
   iceServers: [{
     urls: 'stun:stun.l.google.com:19302'
@@ -70,6 +64,7 @@ function startWebRTC(isOfferer) {
 
   // When a remote stream arrives display it in the #remoteVideo element
   pc.ontrack = event => {
+    console.log('new member?')
     const stream = event.streams[0];
     if (!remoteVideo.srcObject || remoteVideo.srcObject.id !== stream.id) {
       remoteVideo.srcObject = stream;
