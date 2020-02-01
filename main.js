@@ -87,6 +87,7 @@ function startWebRTC(isOfferer) {
 function startListentingToSignals() {
   // Listen to signaling data from Scaledrone
   room.on('data', (message, client) => {
+    console.log(message,client);
     // Message was sent by us
     if (!client || client.id === drone.clientId) {
       return;

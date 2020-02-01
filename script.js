@@ -11,6 +11,7 @@ const configuration = {
 };
 let room;
 let pc;
+let stream;
 
 function onSuccess() {}
 function onError(error) {
@@ -31,9 +32,13 @@ drone.on("open", error => {
   // connected to the room (including us). Signaling server is ready.
   room.on("members", members => {
     console.log("MEMBERS", members);
+    if (members.length >= 3) {
+      return alert('The room is full');
+    }
     // If we are the second user to connect to the room we will be creating the offer
-    const isOfferer = members.length === 2;
+    const isOfferer = members.length >= 2;
     startWebRTC(isOfferer);
+    
   });
 });
 
@@ -51,6 +56,7 @@ function startWebRTC(isOfferer) {
   // 'onicecandidate' notifies us whenever an ICE agent needs to deliver a
   // message to the other peer through the signaling server
   pc.onicecandidate = event => {
+    console.log('onicecandidate',event.candidate)
     if (event.candidate) {
       sendMessage({ candidate: event.candidate });
     }
@@ -73,24 +79,13 @@ function startWebRTC(isOfferer) {
 
   // When a remote stream arrives display it in the #remoteVideo element
   pc.ontrack = event => {
-    console.log("new member?");
     const stream = event.streams[0];
     if (!remoteVideo.srcObject || remoteVideo.srcObject.id !== stream.id) {
       remoteVideo.srcObject = stream;
     }
   };
 
-  navigator.mediaDevices
-    .getUserMedia({
-      audio: true,
-      video: true
-    })
-    .then(stream => {
-      // Display your local video in #localVideo element
-      localVideo.srcObject = stream;
-      // Add your stream to be sent to the conneting peer
-      stream.getTracks().forEach(track => pc.addTrack(track, stream));
-    }, onError);
+  stream.getTracks().forEach(track => pc.addTrack(track, stream));
 
   // Listen to signaling data from Scaledrone
   room.on("data", (message, client) => {
@@ -98,7 +93,6 @@ function startWebRTC(isOfferer) {
     if (client.id === drone.clientId) {
       return;
     }
-
     if (message.sdp) {
       // This is called after receiving an offer or answer from another peer
       pc.setRemoteDescription(
@@ -130,3 +124,15 @@ function startWebRTC(isOfferer) {
   });
 }
 
+navigator.mediaDevices
+    .getUserMedia({
+      audio: true,
+      video: true
+    })
+    .then(stre => {
+      // Display your local video in #localVideo element
+      localVideo.srcObject = stre;
+      stream = stre;
+      // Add your stream to be sent to the conneting peer
+      
+    }, onError);
